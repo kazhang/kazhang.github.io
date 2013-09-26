@@ -1,4 +1,4 @@
-#The 5th week in US
+#The 6th week in US
 ##Cloud Foudry
 就在几周前，我们得知Cloud Foundry在这周末会举办一个展会，思科也会派人参加。得知消息后我们就跟Debo联系，看看有没有可能去参加一下。很快Debo就给我们搞到了免费的门票，但条件是我们要在思科的展位上展出点东西。
 
