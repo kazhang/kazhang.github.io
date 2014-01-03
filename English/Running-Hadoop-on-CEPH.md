@@ -34,13 +34,15 @@ Create pools for Hadoop on Ceph admin node:
     ceph osd pool set hadoop1 size 1 
     ceph mds add_data_pool hadoop1
 
-Create a folder for Ceph configuration and keyring files on Hadoop nodes. Authorize these nodes:
+On Hadoop nodes, create a folder for Ceph configuration and keyring files. make sure Hadoop user has access to those files:
+
+    sudo mkdir /etc/ceph
+    sudo chown -R hduser:hadoop /etc/ceph/
+
+Authorize these nodes:
 
     ceph-deploy admin ${Hadoop_user}@${Hadoop_node_ip}
 
-On Hadoop nodes, make sure Hadoop user has access to those files:
-
-    sudo chown -R hduser:hadoop /etc/ceph/
 
 Open $HADOOP_HOME/conf/core-site.xml, modify it as following:
 
