@@ -83,3 +83,8 @@ Open $HADOOP_HOME/conf/core-site.xml, modify it as following:
 Open `$HADOOP_HOME/conf/hadoop-env.sh`, add the path of `libcephfs.jar`
 
     export HADOOP_CLASSPATH=/usr/share/java/libcephfs.jar
+
+## Try it
+If everything works fine, you can list the root directory:
+
+    $HADOOP_HOME/bin/hadoop fs -ls /
