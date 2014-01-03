@@ -36,9 +36,9 @@ Create pools for Hadoop on Ceph admin node:
 
 Create a folder for Ceph configuration and keyring files on Hadoop nodes. Authorize these nodes:
 
-    ceph-deploy admin ${$Hadoop_user}@${Hadoop_node_ip}
+    ceph-deploy admin ${Hadoop_user}@${Hadoop_node_ip}
 
-On Hadoop nodes:
+On Hadoop nodes, make sure Hadoop user has access to those files:
 
     sudo chown -R hduser:hadoop /etc/ceph/
 
