@@ -147,6 +147,20 @@ def generate_category(meta_store):
     output += foot
     write_file('category.html', output)
 
+def generate_archive(meta_store):
+    meta_store = sorted(meta_store, key = lambda meta: meta['date'], reverse = True)
+    output = head.replace("{{title}}", "Kai's notes | Archive")
+    fmt = '<p><span>%s</span>: <a href="/%s/%s">%s</a></p>\n'
+    cur = "0000-00-00"
+    for meta in meta_store:
+        date = meta['date']
+        if not date.startswith(cur):
+            cur = date[0:7]
+            output += "<h2>%s</h2>\n" % cur
+        output += fmt % (meta['date'], meta['category'], meta['title'], meta['title'])   
+    output += foot
+    write_file('archive.html', output)
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         files = sys.argv[1:]
@@ -160,4 +174,5 @@ if __name__ == '__main__':
     generate_index(meta_store)
     generate_tag(meta_store)
     generate_category(meta_store)
+    generate_archive(meta_store)
     save_meta_store()
