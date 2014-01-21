@@ -37,6 +37,10 @@ def parse_meta(raw_meta):
     meta['filename'] = meta['filename'].replace('_posts/', '')
     meta['category'], sep, name = meta['filename'].rpartition('/')
     meta['title'], fmt = extract(name, '.')
+    if meta['tag']:
+        meta['tag'] = [s.strip() for s in meta['tag'].split(',')]
+    else:
+        meta['tag'] = []
     return meta
 
 def output_article(path, title, text):
@@ -90,12 +94,11 @@ def generate_article(filename):
     output += foot
     output_article(path, title, output)
 
-def generate_index():
-    global meta_store
-    meta_store = sorted(meta_store, key = lambda meta: meta['date'])
+def generate_index(meta_store):
+    meta_store = sorted(meta_store, key = lambda meta: meta['date'], reverse = True)
     output = head.replace("{{title}}", "Kai's notes")
     cnt = 0
-    fmt = '<p><span>%s</span>: <a href="/%s/%s">%s</a></p>'
+    fmt = '<p><span>%s</span>: <a href="/%s/%s">%s</a></p>\n'
     for meta in meta_store:
         output += fmt % (meta['date'], meta['category'], meta['title'], meta['title'])
         cnt += 1
@@ -103,6 +106,28 @@ def generate_index():
             break
     output += foot
     f = codecs.open('index.html', 'w', 'utf-8')
+    f.write(output)
+    f.close()
+
+def generate_tag(meta_store):
+    meta_store = sorted(meta_store, key = lambda meta: meta['date'], reverse = True)
+    tags = {}
+    for meta in meta_store:
+        for tag in meta['tag']:
+            if tags.has_key(tag):
+                tags[tag].append(meta)
+            else:
+                tags[tag] = [meta]
+
+    output = head.replace("{{title}}", "Kai's notes | tags")
+    fmt = '<p><span>%s</span>: <a href="/%s/%s">%s</a></p>\n'
+    for tag in sorted(tags.iterkeys()):
+        output += "<t2>%s</t2>\n" % tag
+        for i in tags[tag]:
+            output += fmt % (i['date'], i['category'], i['title'], i['title'])
+    output += foot
+
+    f = codecs.open('tag.html', 'w', 'utf-8')
     f.write(output)
     f.close()
 
@@ -116,5 +141,6 @@ if __name__ == '__main__':
     load_meta_store()
     for f in files:
         generate_article(f)
-    generate_index()
+    generate_index(meta_store)
+    generate_tag(meta_store)
     save_meta_store()
