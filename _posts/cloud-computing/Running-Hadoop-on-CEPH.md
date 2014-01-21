@@ -1,7 +1,13 @@
+author: Kai Zhang
+date: 2014-01-19
+tag: Hadoop, Ceph
+
+--begin--
+
 # Hadoop和CephFS整合
 
 ## 前提
-1. 有一个运行中的CEPH集群，可以参照[CEPH官方指南](http://ceph.com/docs/master/rados/deployment/)安装。
+1. 有一个运行中的Ceph集群，可以参照[Ceph官方指南](http://ceph.com/docs/master/rados/deployment/)安装。
 2. 有一个运行中的Hadoop，可以参照[Running Hadoop on Ubuntu Linux (Single-Node Cluster)](http://www.michael-noll.com/tutorials/running-hadoop-on-ubuntu-linux-single-node-cluster/)的步骤。
 
 ## 安装必要的包
@@ -10,7 +16,7 @@
 * libcephfs-java
 * libcephfs-jni
 
-安装这两个包需要先添加CEPH的源
+安装这两个包需要先添加Ceph的源
 
     wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | sudo apt-key add -
     echo deb http://ceph.com/debian-dumpling/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
@@ -25,17 +31,17 @@
 
 ## 下载CephFS Hadoop 插件
 
-Hadoop需要一个CephFS插件的支持，可以在[CEPH官方网站](http://ceph.com/download/hadoop-cephfs.jar)下载到。 将插件放入`$HADOOP_HOME/lib/`中
+Hadoop需要一个CephFS插件的支持，可以在[Ceph官方网站](http://ceph.com/download/hadoop-cephfs.jar)下载到。 将插件放入`$HADOOP_HOME/lib/`中
 
 ## 创建pool
-在CEPH控制节点上创建Hadoop使用的池：
+在Ceph控制节点上创建Hadoop使用的池：
 
     ceph osd pool create hadoop1 100
     ceph osd pool set hadoop1 size 1 
     ceph mds add_data_pool hadoop1
 
 ## 授权Hadoop节点
-在Hadoop节点上创建一个文件夹保存CEPH配置和keyring，下面以/etc/ceph为例，注意保证Hadoop用户可读这些文件。    
+在Hadoop节点上创建一个文件夹保存Ceph配置和keyring，下面以/etc/ceph为例，注意保证Hadoop用户可读这些文件。    
 
 装有ceph-deploy的节点：
 
@@ -61,7 +67,7 @@ Hadoop节点：
     </property>
     <property>
         <name>fs.default.name</name>
-        <value>ceph://${CEPH_monitor_ip}/</value>
+        <value>ceph://${Ceph_monitor_ip}/</value>
     </property>
     <property>
         <name>ceph.conf.file</name>
