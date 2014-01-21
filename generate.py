@@ -62,9 +62,12 @@ def output_article(path, title, text):
     
 def load_meta_store():
     global meta_store
-    f = open("./.meta_store.json", 'r')
-    meta_store = json.load(f)
-    f.close()
+    try:
+        f = open("./.meta_store.json", 'r')
+        meta_store = json.load(f)
+        f.close()
+    except IOError:
+        meta_store = []
 
 def save_meta_store():
     f = open("./.meta_store.json", 'w')
