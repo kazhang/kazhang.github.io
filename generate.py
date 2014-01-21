@@ -54,6 +54,8 @@ def output_article(path, title, text):
     if not directory.endswith('/'):
         directory += '/'
 
+    directory += title + "/"
+
     if not os.path.exists(directory):
         os.makedirs(directory)
 
