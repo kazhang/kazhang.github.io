@@ -15,6 +15,11 @@ def read_file(filename):
     f.close()
     return [0, content]
 
+def write_file(filename, text):
+    f = codecs.open(filename, 'w', 'utf-8')
+    f.write(text)
+    f.close()
+
 def extract(str, sep):
     h, s, t = str.partition(sep)
     h = h.strip()
@@ -53,10 +58,8 @@ def output_article(path, title, text):
         os.makedirs(directory)
 
     filename = directory + 'index.html'
-    f = codecs.open(filename, 'w', 'utf-8')
-    f.write(text)
-    f.close()
-
+    write_file(filename, text)
+    
 def load_meta_store():
     global meta_store
     f = open("./.meta_store.json", 'r')
@@ -105,9 +108,7 @@ def generate_index(meta_store):
         if cnt == 5:
             break
     output += foot
-    f = codecs.open('index.html', 'w', 'utf-8')
-    f.write(output)
-    f.close()
+    write_file('index.html', output)
 
 def generate_tag(meta_store):
     meta_store = sorted(meta_store, key = lambda meta: meta['date'], reverse = True)
@@ -119,17 +120,32 @@ def generate_tag(meta_store):
             else:
                 tags[tag] = [meta]
 
-    output = head.replace("{{title}}", "Kai's notes | tags")
+    output = head.replace("{{title}}", "Kai's notes | Tag")
     fmt = '<p><span>%s</span>: <a href="/%s/%s">%s</a></p>\n'
     for tag in sorted(tags.iterkeys()):
         output += "<t2>%s</t2>\n" % tag
         for i in tags[tag]:
             output += fmt % (i['date'], i['category'], i['title'], i['title'])
     output += foot
+    write_file('tag.html', output)
 
-    f = codecs.open('tag.html', 'w', 'utf-8')
-    f.write(output)
-    f.close()
+def generate_category(meta_store):
+    meta_store = sorted(meta_store, key = lambda meta: meta['date'], reverse = True)
+    categories = {}
+    for meta in meta_store:
+        if categories.has_key(meta['category']):
+            categories[meta['category']].append(meta)
+        else:
+            categories[meta['category']] = [meta]
+
+    output = head.replace("{{title}}", "Kai's notes | Category")
+    fmt = '<p><span>%s</span>: <a href="/%s/%s">%s</a></p>\n'
+    for cate in sorted(categories.iterkeys()):
+        output += "<t2>%s</t2>\n" % cate
+        for i in categories[cate]:
+            output += fmt % (i['date'], i['category'], i['title'], i['title'])
+    output += foot
+    write_file('category.html', output)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -143,4 +159,5 @@ if __name__ == '__main__':
         generate_article(f)
     generate_index(meta_store)
     generate_tag(meta_store)
+    generate_category(meta_store)
     save_meta_store()
