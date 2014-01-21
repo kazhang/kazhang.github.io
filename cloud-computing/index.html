@@ -1,0 +1,89 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Running-Hadoop-on-CEPH</title>
+    </head>
+    <body>
+<h1>Hadoop和CephFS整合</h1>
+<h2>前提</h2>
+<ol>
+<li>有一个运行中的Ceph集群，可以参照<a href="http://ceph.com/docs/master/rados/deployment/">Ceph官方指南</a>安装。</li>
+<li>有一个运行中的Hadoop，可以参照<a href="http://www.michael-noll.com/tutorials/running-hadoop-on-ubuntu-linux-single-node-cluster/">Running Hadoop on Ubuntu Linux (Single-Node Cluster)</a>的步骤。</li>
+</ol>
+<h2>安装必要的包</h2>
+<p>需要在Hadoop节点上安装的包有：</p>
+<ul>
+<li>libcephfs-java</li>
+<li>libcephfs-jni</li>
+</ul>
+<p>安装这两个包需要先添加Ceph的源</p>
+<pre><code>wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | sudo apt-key add -
+echo deb http://ceph.com/debian-dumpling/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
+sudo apt-get update
+sudo apt-get install libcephfs-jni libcephfs-java
+</code></pre>
+<h2>创建软连接</h2>
+<p>将<code>libcephfs_jni.so</code>添加到Hadoop目录中：</p>
+<pre><code>cd $HADOOP_HOME/lib/native/Linux-amd64-64 (or Linux-i386-32 on 32-bit platform)
+ln -s /usr/lib/jni/libcephfs_jni.so .
+</code></pre>
+<h2>下载CephFS Hadoop 插件</h2>
+<p>Hadoop需要一个CephFS插件的支持，可以在<a href="http://ceph.com/download/hadoop-cephfs.jar">Ceph官方网站</a>下载到。 将插件放入<code>$HADOOP_HOME/lib/</code>中</p>
+<h2>创建pool</h2>
+<p>在Ceph控制节点上创建Hadoop使用的池：</p>
+<pre><code>ceph osd pool create hadoop1 100
+ceph osd pool set hadoop1 size 1 
+ceph mds add_data_pool hadoop1
+</code></pre>
+<h2>授权Hadoop节点</h2>
+<p>在Hadoop节点上创建一个文件夹保存Ceph配置和keyring，下面以/etc/ceph为例，注意保证Hadoop用户可读这些文件。    </p>
+<p>装有ceph-deploy的节点：</p>
+<pre><code>ceph-deploy admin ${$Hadoop_user}@${Hadoop_node_ip}
+</code></pre>
+<p>Hadoop节点：</p>
+<pre><code>sudo chown -R hduser:hadoop /etc/ceph/
+</code></pre>
+<h2>更改配置</h2>
+<h3>core-site.xml</h3>
+<p>打开conf/core-site.xml，作如下更改：</p>
+<pre><code>&lt;?xml version="1.0"?&gt;
+&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;
+
+&lt;!-- Put site-specific property overrides in this file. --&gt;
+
+&lt;configuration&gt;
+&lt;property&gt;
+    &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
+    &lt;value&gt;/app/hadoop/tmp&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;fs.default.name&lt;/name&gt;
+    &lt;value&gt;ceph://${Ceph_monitor_ip}/&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;ceph.conf.file&lt;/name&gt;
+    &lt;value&gt;/etc/ceph/ceph.conf&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;ceph.auth.id&lt;/name&gt;
+    &lt;value&gt;admin&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;ceph.auth.keyring&lt;/name&gt;
+    &lt;value&gt;/etc/ceph/ceph.client.admin.keyring&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;ceph.data.pools&lt;/name&gt;
+    &lt;value&gt;hadoop1&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;fs.ceph.impl&lt;/name&gt;
+    &lt;value&gt;org.apache.hadoop.fs.ceph.CephFileSystem&lt;/value&gt;
+&lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+<h3>更改hadoop-env.sh</h3>
+<p>打开<code>$HADOOP_HOME/conf/hadoop-env.sh</code>，加入<code>libcephfs.jar</code>的位置，一般是<code>/usr/share/java/libcephfs.jar</code></p>
+<pre><code>export HADOOP_CLASSPATH=/usr/share/java/libcephfs.jar
+</code></pre>    </body>
+</html>
