@@ -1,4 +1,5 @@
 author: Kai Zhang
+title: Hadoop和CephFS整合
 date: 2014-01-19
 tag: Hadoop, Ceph
 
