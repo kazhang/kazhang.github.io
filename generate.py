@@ -32,7 +32,6 @@ def parse_meta(raw_meta):
             'category':'',
             'tag':'',
             'date':'',
-            'filename':'',
             'title':''
             }
     for line in lines:
@@ -41,20 +40,21 @@ def parse_meta(raw_meta):
     
     meta['filename'] = meta['filename'].replace('_posts/', '')
     meta['category'], sep, name = meta['filename'].rpartition('/')
-    meta['title'], fmt = extract(name, '.')
+    meta['slug'], fmt = extract(name, '.')
+    del meta['filename']
+
     if meta['tag']:
         meta['tag'] = [s.strip() for s in meta['tag'].split(',')]
     else:
         meta['tag'] = []
     return meta
 
-def output_article(path, title, text):
-    directory = path.replace('_posts/', '', 1)
-
+def output_article(category, slug, text):
+    directory = category
     if not directory.endswith('/'):
         directory += '/'
 
-    directory += title + "/"
+    directory += slug + "/"
 
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -80,7 +80,7 @@ def update_meta_store(meta):
     global meta_store
     found = False
     for idx in range(0, len(meta_store)):
-        if meta_store[idx]['filename'] == meta['filename']:
+        if meta_store[idx]['slug'] == meta['slug'] and meta_store[idx]['category'] == meta['category']:
             meta_store[idx] = meta
             found = True
             break
@@ -88,19 +88,19 @@ def update_meta_store(meta):
         meta_store.insert(0, meta)
 
 def generate_article(filename):
-    path, sep, title = filename.rpartition('/')
-    title, sep, fmt = title.rpartition('.')
-    output = head.replace("{{title}}", title)
     ret, content = read_file(filename)
     if ret < 0:
         return
+
     raw_meta, content = extract(content, "--begin--")
     raw_meta += "\n filename: " + filename
     meta = parse_meta(raw_meta)
     update_meta_store(meta)
+    output = head.replace("{{title}}", meta['title'])
     output += markdown.markdown(content)
     output += foot
-    output_article(path, title, output)
+
+    output_article(meta['category'], meta['slug'], output)
 
 def generate_index(meta_store):
     meta_store = sorted(meta_store, key = lambda meta: meta['date'], reverse = True)
@@ -108,7 +108,7 @@ def generate_index(meta_store):
     cnt = 0
     fmt = '<p><span>%s</span>: <a href="/%s/%s">%s</a></p>\n'
     for meta in meta_store:
-        output += fmt % (meta['date'], meta['category'], meta['title'], meta['title'])
+        output += fmt % (meta['date'], meta['category'], meta['slug'], meta['title'])
         cnt += 1
         if cnt == 5:
             break
@@ -130,7 +130,7 @@ def generate_tag(meta_store):
     for tag in sorted(tags.iterkeys()):
         output += "<t2>%s</t2>\n" % tag
         for i in tags[tag]:
-            output += fmt % (i['date'], i['category'], i['title'], i['title'])
+            output += fmt % (i['date'], i['category'], i['slug'], i['title'])
     output += foot
     write_file('tag.html', output)
 
@@ -148,7 +148,7 @@ def generate_category(meta_store):
     for cate in sorted(categories.iterkeys()):
         output += "<t2>%s</t2>\n" % cate
         for i in categories[cate]:
-            output += fmt % (i['date'], i['category'], i['title'], i['title'])
+            output += fmt % (i['date'], i['category'], i['slug'], i['title'])
     output += foot
     write_file('category.html', output)
 
@@ -162,7 +162,7 @@ def generate_archive(meta_store):
         if not date.startswith(cur):
             cur = date[0:7]
             output += "<h2>%s</h2>\n" % cur
-        output += fmt % (meta['date'], meta['category'], meta['title'], meta['title'])   
+        output += fmt % (meta['date'], meta['category'], meta['slug'], meta['title'])   
     output += foot
     write_file('archive.html', output)
 
