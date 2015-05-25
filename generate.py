@@ -97,7 +97,7 @@ def generate_article(filename):
     meta = parse_meta(raw_meta)
     update_meta_store(meta)
     output = head.replace("{{title}}", meta['title'])
-    output += markdown.markdown(content)
+    output += markdown.markdown(content, extensions=['markdown.extensions.tables'])
     output += foot
 
     output_article(meta['category'], meta['slug'], output)
