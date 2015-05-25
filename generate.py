@@ -88,6 +88,18 @@ def update_meta_store(meta):
         meta_store.insert(0, meta)
 
 def generate_article(filename):
+    if os.path.isdir(filename):
+        entries = os.listdir(filename)
+        for entry in entries:
+            generate_article(os.path.join(filename, entry))
+        return
+
+    ans = raw_input("Generate for %s?[Y/n]:" % filename)
+    while ans not in ['y', 'Y', 'n', 'N', '']:
+        ans = raw_input("Generate for %s?[Y/n]:" % filename)
+    if ans in ['n', 'N']:
+        return
+
     ret, content = read_file(filename)
     if ret < 0:
         return
@@ -169,6 +181,8 @@ def generate_archive(meta_store):
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         files = sys.argv[1:]
+    else:
+        files = ['_posts']
 
     global head, foot
     ret, head = read_file("./_includes/head.html")
