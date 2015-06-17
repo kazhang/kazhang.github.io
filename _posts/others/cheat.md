@@ -24,6 +24,12 @@ date: 2015-04-06
 | ------- | ----------- |
 | netstat -apn | 查看已占用的端口 |
 
+## printenv
+
+| command | description |
+| ------- | ----------- |
+| printenv | Prints the list of environment variables |
+
 ## rsync
 
 | command | description |
