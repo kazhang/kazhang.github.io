@@ -16,7 +16,14 @@ date: 2015-04-06
 
 | command | description |
 | ------- | ----------- |
-| sudo git daemon --export-all --base-path=.. --enable=receive-pack | Create a simple temporary git server |
+| git daemon --export-all --base-path=.. --enable=receive-pack | Create a simple temporary git server |
+
+## nc
+
+| command | description |
+| ------- | ----------- |
+| nc ip port | connect to ip on port |
+| nc -uvl localhost port | receive message that sends to localhost on port |
 
 ## netstat
 
@@ -36,7 +43,6 @@ date: 2015-04-06
 | ------- | ----------- |
 | rsync -r source target | 将source文件夹同步到target内 |
 | rsync -r source/ target | 将source内部文件同步到target内 |
-
 
 ## tar
 
